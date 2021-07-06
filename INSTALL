@@ -9,7 +9,7 @@ C++ compiler    g++ 4.2.3 or other modern C++ compiler
 pkg-config      http://pkg-config.freedesktop.org/
 GNU make        http://www.gnu.org/software/make/
 
-To build fuse-zip do the following:
+To build vmas-fs do the following:
 
 $ make release
 

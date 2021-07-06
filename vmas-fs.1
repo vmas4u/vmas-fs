@@ -1,9 +1,9 @@
 .\" '\" t
 .\" ** The above line should force tbl to be a preprocessor **
-.\" Man page for fuse-zip
-.TH "vmas-fs" "1" "July 2021" "FUSE filesystem to read and modify VPL archives" "FUSE filesystem to read and modify VPL archives"
+.\" Man page for vmas-fs
+.TH "vmas-fs" "1" "July 2021" "FUSE filesystem to read and modify VFS archives" "FUSE filesystem to read and modify VFS archives"
 .SH "NAME"
-fuse\-zip \- a FUSE filesystem for vpl archives with write support
+fuse\-zip \- a FUSE filesystem for vfs archives with write support
 .SH "SYNOPSIS"
 .\" The general command line
 .B vmas\-fs
@@ -38,13 +38,12 @@ use the following fusermount options:
 See FUSE documentation for details.
 .SH "DESCRIPTION"
 .B vmas\-fs
-is a fuse filesystem, that enables any program to work with a VPL archive as though it is a plain directory.
+is a fuse filesystem, that enables any program to work with a VFS archive as though it is a plain directory.
 Unlike KIO or Gnome VFS, it can be used in any application without modifications.
 
 Support for UNIX file permissions and owner information has been added in
-version 0.4. See
-.B PERMISSIONS
-for details.
+version 0.4. 
+
 .SH "USAGE"
 General usage would look like this
 

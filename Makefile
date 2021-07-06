@@ -1,6 +1,6 @@
 DEST=vmas-fs
-LIBS=-Llib -Wl,-Bstatic -lfusezip $(shell pkg-config libzip --libs) -Wl,-Bdynamic $(shell pkg-config fuse --libs)
-LIB=lib/libfusezip.a
+LIBS=-Llib -Wl,-Bstatic -lvmasfs $(shell pkg-config libzip --libs) -Wl,-Bdynamic $(shell pkg-config fuse --libs)
+LIB=lib/libvmasfs.a
 CXXFLAGS=-g -O0 -Wall -Wextra
 RELEASE_CXXFLAGS=-O2 -Wall -Wextra
 RELEASE_LDFLAGS=-static-libgcc -static-libstdc++

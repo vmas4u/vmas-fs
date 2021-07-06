@@ -1,22 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
-//  Copyright (C) 2008-2014 by Alexander Galanin                          //
-//  al@galanin.nnov.ru                                                    //
-//  http://galanin.nnov.ru/~al                                            //
+//  Copyright (C) 2021 by V+ Publicidad SpA                               //
+//  http://www.vmaspublicidad.com                                         //
 //                                                                        //
-//  This program is free software; you can redistribute it and/or modify  //
-//  it under the terms of the GNU Lesser General Public License as        //
-//  published by the Free Software Foundation; either version 3 of the    //
-//  License, or (at your option) any later version.                       //
-//                                                                        //
-//  This program is distributed in the hope that it will be useful,       //
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of        //
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         //
-//  GNU General Public License for more details.                          //
-//                                                                        //
-//  You should have received a copy of the GNU Lesser General Public      //
-//  License along with this program; if not, write to the                 //
-//  Free Software Foundation, Inc.,                                       //
-//  51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA               //
 ////////////////////////////////////////////////////////////////////////////
 
 #include <zip.h>
@@ -25,12 +10,12 @@
 #include <cassert>
 #include <stdexcept>
 
-#include "fuseZipData.h"
+#include "vmasFSData.h"
 
-FuseZipData::FuseZipData(const char *archiveName, struct zip *z, const char *cwd): m_zip(z), m_archiveName(archiveName), m_cwd(cwd)  {
+VmasFSData::VmasFSData(const char *archiveName, struct zip *z, const char *cwd): m_zip(z), m_archiveName(archiveName), m_cwd(cwd)  {
 }
 
-FuseZipData::~FuseZipData() {
+VmasFSData::~VmasFSData() {
     if (chdir(m_cwd.c_str()) != 0) {
         syslog(LOG_ERR, "Unable to chdir() to archive directory %s. Trying to save file into /tmp",
                 m_cwd.c_str());
@@ -47,7 +32,7 @@ FuseZipData::~FuseZipData() {
     }
 }
 
-bool FuseZipData::try_passwd(const char *pass) {
+bool VmasFSData::try_passwd(const char *pass) {
     int zep, try_count;
     struct zip_file *zf;
 
@@ -65,7 +50,7 @@ just_try:
     return zf != NULL;
 }
 
-void FuseZipData::build_tree(bool readonly) {
+void VmasFSData::build_tree(bool readonly) {
     m_root = FileNode::createRootNode();
     if (m_root == NULL) {
         throw std::bad_alloc();
@@ -110,7 +95,7 @@ void FuseZipData::build_tree(bool readonly) {
     }
 }
 
-void FuseZipData::connectNodeToTree (FileNode *node) {
+void VmasFSData::connectNodeToTree (FileNode *node) {
     FileNode *parent = findParent(node);
     if (parent == NULL) {
         parent = FileNode::createIntermediateDir (m_zip,
@@ -128,7 +113,7 @@ void FuseZipData::connectNodeToTree (FileNode *node) {
     parent->appendChild (node);
 }
 
-int FuseZipData::removeNode(FileNode *node) {
+int VmasFSData::removeNode(FileNode *node) {
     assert(node != NULL);
     assert(node->parent != NULL);
     node->parent->detachChild (node);
@@ -144,7 +129,7 @@ int FuseZipData::removeNode(FileNode *node) {
     }
 }
 
-void FuseZipData::validateFileName(const char *fname) {
+void VmasFSData::validateFileName(const char *fname) {
     if (fname[0] == 0) {
         throw std::runtime_error("empty file name");
     }
@@ -153,7 +138,7 @@ void FuseZipData::validateFileName(const char *fname) {
     }
 }
 
-void FuseZipData::convertFileName(const char *fname, bool readonly,
+void VmasFSData::convertFileName(const char *fname, bool readonly,
         bool needPrefix, std::string &converted) {
     const char *UP_PREFIX = "UP";
     const char *CUR_PREFIX = "CUR";
@@ -213,12 +198,12 @@ void FuseZipData::convertFileName(const char *fname, bool readonly,
     converted.append(start);
 }
 
-FileNode *FuseZipData::findParent (const FileNode *node) const {
+FileNode *VmasFSData::findParent (const FileNode *node) const {
     std::string name = node->getParentName();
     return find(name.c_str());
 }
 
-void FuseZipData::insertNode (FileNode *node) {
+void VmasFSData::insertNode (FileNode *node) {
     FileNode *parent = findParent (node);
     assert (parent != NULL);
     parent->appendChild (node);
@@ -228,7 +213,7 @@ void FuseZipData::insertNode (FileNode *node) {
     files[node->full_name.c_str()] = node;
 }
 
-void FuseZipData::renameNode (FileNode *node, const char *newName, bool
+void VmasFSData::renameNode (FileNode *node, const char *newName, bool
         reparent) {
     assert(node != NULL);
     assert(newName != NULL);
@@ -256,7 +241,7 @@ void FuseZipData::renameNode (FileNode *node, const char *newName, bool
     }
 }
 
-FileNode *FuseZipData::find (const char *fname) const {
+FileNode *VmasFSData::find (const char *fname) const {
     filemap_t::const_iterator i = files.find(fname);
     if (i == files.end()) {
         return NULL;
@@ -265,7 +250,7 @@ FileNode *FuseZipData::find (const char *fname) const {
     }
 }
 
-void FuseZipData::save () {
+void VmasFSData::save () {
     for (filemap_t::const_iterator i = files.begin(); i != files.end(); ++i) {
         FileNode *node = i->second;
         if (node == m_root) {

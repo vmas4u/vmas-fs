@@ -1,22 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
-//  Copyright (C) 2008-2014 by Alexander Galanin                          //
-//  al@galanin.nnov.ru                                                    //
-//  http://galanin.nnov.ru/~al                                            //
+//  Copyright (C) 2021 by V+ Publicidad SpA                               //
+//  http://www.vmaspublicidad.com                                         //
 //                                                                        //
-//  This program is free software; you can redistribute it and/or modify  //
-//  it under the terms of the GNU Lesser General Public License as        //
-//  published by the Free Software Foundation; either version 3 of the    //
-//  License, or (at your option) any later version.                       //
-//                                                                        //
-//  This program is distributed in the hope that it will be useful,       //
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of        //
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         //
-//  GNU General Public License for more details.                          //
-//                                                                        //
-//  You should have received a copy of the GNU Lesser General Public      //
-//  License along with this program; if not, write to the                 //
-//  Free Software Foundation, Inc.,                                       //
-//  51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA               //
 ////////////////////////////////////////////////////////////////////////////
 
 #define KEY_HELP (0)
@@ -33,14 +18,14 @@
 
 #include <cerrno>
 
-#include "fuse-zip.h"
+#include "vmas-fs.h"
 #include "fuseZipData.h"
 
 /**
  * Print usage information
  */
 void print_usage() {
-    fprintf(stderr, "usage: %s [options] <zip-file> <mountpoint>\n\n", PROGRAM);
+    fprintf(stderr, "usage: %s [options] <vfs-file> <mountpoint>\n\n", PROGRAM);
     fprintf(stderr,
             "general options:\n"
             "    -o opt,[opt...]        mount options\n"
@@ -54,7 +39,7 @@ void print_usage() {
 }
 
 /**
- * Print version information (fuse-zip and FUSE library)
+ * Print version information (vmas-fs and FUSE library)
  */
 void print_version() {
     fprintf(stderr, "%s version: %s\n", PROGRAM, VERSION);
@@ -63,7 +48,7 @@ void print_version() {
 /**
  * Parameters for command-line argument processing function
  */
-struct fusezip_param {
+struct vmasfs_param {
     // help shown
     bool help;
     // version information shown
@@ -81,14 +66,14 @@ struct fusezip_param {
 /**
  * Function to process arguments (called from fuse_opt_parse).
  *
- * @param data  Pointer to fusezip_param structure
+ * @param data  Pointer to vmasfs_param structure
  * @param arg is the whole argument or option
  * @param key determines why the processing function was called
  * @param outargs the current output argument list
  * @return -1 on error, 0 if arg is to be discarded, 1 if arg should be kept
  */
 static int process_arg(void *data, const char *arg, int key, struct fuse_args *outargs) {
-    struct fusezip_param *param = (fusezip_param*)data;
+    struct vmasfs_param *param = (vmasfs_param*)data;
 
     (void)outargs;
 
@@ -145,7 +130,7 @@ static int process_arg(void *data, const char *arg, int key, struct fuse_args *o
     }
 }
 
-static const struct fuse_opt fusezip_opts[] = {
+static const struct fuse_opt vmasfs_opts[] = {
     FUSE_OPT_KEY("-h",          KEY_HELP),
     FUSE_OPT_KEY("--help",      KEY_HELP),
     FUSE_OPT_KEY("-V",          KEY_VERSION),
@@ -163,7 +148,7 @@ int main(int argc, char *argv[]) {
     }
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
     FuseZipData *data = NULL;
-    struct fusezip_param param;
+    struct vmasfs_param param;
     param.help = false;
     param.version = false;
     param.readonly = false;
@@ -171,7 +156,7 @@ int main(int argc, char *argv[]) {
     param.usePasswd = false;
     param.fileName = NULL;
 
-    if (fuse_opt_parse(&args, &param, fusezip_opts, process_arg)) {
+    if (fuse_opt_parse(&args, &param, vmasfs_opts, process_arg)) {
         fuse_opt_free_args(&args);
         return EXIT_FAILURE;
     }
@@ -214,43 +199,43 @@ int main(int argc, char *argv[]) {
         }
     }
 
-    static struct fuse_operations fusezip_oper;
+    static struct fuse_operations vmasfs_oper;
     /* {{{ */
-    fusezip_oper.init       =   fusezip_init;
-    fusezip_oper.destroy    =   fusezip_destroy;
-    fusezip_oper.readdir    =   fusezip_readdir;
-    fusezip_oper.getattr    =   fusezip_getattr;
-    fusezip_oper.statfs     =   fusezip_statfs;
-    fusezip_oper.open       =   fusezip_open;
-    fusezip_oper.read       =   fusezip_read;
-    fusezip_oper.write      =   fusezip_write;
-    fusezip_oper.release    =   fusezip_release;
-    fusezip_oper.unlink     =   fusezip_unlink;
-    fusezip_oper.rmdir      =   fusezip_rmdir;
-    fusezip_oper.mkdir      =   fusezip_mkdir;
-    fusezip_oper.rename     =   fusezip_rename;
-    fusezip_oper.create     =   fusezip_create;
-    fusezip_oper.chmod      =   fusezip_chmod;
-    fusezip_oper.chown      =   fusezip_chown;
-    fusezip_oper.flush      =   fusezip_flush;
-    fusezip_oper.fsync      =   fusezip_fsync;
-    fusezip_oper.fsyncdir   =   fusezip_fsyncdir;
-    fusezip_oper.opendir    =   fusezip_opendir;
-    fusezip_oper.releasedir =   fusezip_releasedir;
-    fusezip_oper.access     =   fusezip_access;
-    fusezip_oper.utimens    =   fusezip_utimens;
-    fusezip_oper.ftruncate  =   fusezip_ftruncate;
-    fusezip_oper.truncate   =   fusezip_truncate;
-    fusezip_oper.setxattr   =   fusezip_setxattr;
-    fusezip_oper.getxattr   =   fusezip_getxattr;
-    fusezip_oper.listxattr  =   fusezip_listxattr;
-    fusezip_oper.removexattr=   fusezip_removexattr;
-    fusezip_oper.readlink   =   fusezip_readlink;
-    fusezip_oper.symlink    =   fusezip_symlink;
+    vmasfs_oper.init       =   vmasfs_init;
+    vmasfs_oper.destroy    =   vmasfs_destroy;
+    vmasfs_oper.readdir    =   vmasfs_readdir;
+    vmasfs_oper.getattr    =   vmasfs_getattr;
+    vmasfs_oper.statfs     =   vmasfs_statfs;
+    vmasfs_oper.open       =   vmasfs_open;
+    vmasfs_oper.read       =   vmasfs_read;
+    vmasfs_oper.write      =   vmasfs_write;
+    vmasfs_oper.release    =   vmasfs_release;
+    vmasfs_oper.unlink     =   vmasfs_unlink;
+    vmasfs_oper.rmdir      =   vmasfs_rmdir;
+    vmasfs_oper.mkdir      =   vmasfs_mkdir;
+    vmasfs_oper.rename     =   vmasfs_rename;
+    vmasfs_oper.create     =   vmasfs_create;
+    vmasfs_oper.chmod      =   vmasfs_chmod;
+    vmasfs_oper.chown      =   vmasfs_chown;
+    vmasfs_oper.flush      =   vmasfs_flush;
+    vmasfs_oper.fsync      =   vmasfs_fsync;
+    vmasfs_oper.fsyncdir   =   vmasfs_fsyncdir;
+    vmasfs_oper.opendir    =   vmasfs_opendir;
+    vmasfs_oper.releasedir =   vmasfs_releasedir;
+    vmasfs_oper.access     =   vmasfs_access;
+    vmasfs_oper.utimens    =   vmasfs_utimens;
+    vmasfs_oper.ftruncate  =   vmasfs_ftruncate;
+    vmasfs_oper.truncate   =   vmasfs_truncate;
+    vmasfs_oper.setxattr   =   vmasfs_setxattr;
+    vmasfs_oper.getxattr   =   vmasfs_getxattr;
+    vmasfs_oper.listxattr  =   vmasfs_listxattr;
+    vmasfs_oper.removexattr=   vmasfs_removexattr;
+    vmasfs_oper.readlink   =   vmasfs_readlink;
+    vmasfs_oper.symlink    =   vmasfs_symlink;
 
 #if FUSE_VERSION >= 28
     // don't allow NULL path
-    fusezip_oper.flag_nullpath_ok = 0;
+    vmasfs_oper.flag_nullpath_ok = 0;
 #endif
     /* }}} */
 
@@ -260,7 +245,7 @@ int main(int argc, char *argv[]) {
     int multithreaded;
     int res;
 
-    fuse = fuse_setup(args.argc, args.argv, &fusezip_oper, sizeof(fusezip_oper), &mountpoint, &multithreaded, data);
+    fuse = fuse_setup(args.argc, args.argv, &vmasfs_oper, sizeof(vmasfs_oper), &mountpoint, &multithreaded, data);
     fuse_opt_free_args(&args);
     if (fuse == NULL) {
         delete data;

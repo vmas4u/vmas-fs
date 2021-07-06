@@ -18,13 +18,13 @@ dir=`mktemp -d`
 pwd=`pwd`
 
 # make program tarball
-id="fuse-zip-$version"
+id="vmas-fs-$version"
 tmp="$dir/$id"
 
 hg archive -X performance\* -t tgz $id.tar.gz
 
 # make tests tarball
-id="fuse-zip-tests-r`hg log performance_tests/ | head -n 1 | cut -d : -f 2 | sed 's/ //g'`"
+id="vmas-fs-tests-r`hg log performance_tests/ | head -n 1 | cut -d : -f 2 | sed 's/ //g'`"
 tmp="$dir/$id"
 
 mkdir "$tmp"

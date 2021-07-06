@@ -29,7 +29,7 @@ package require Tcl 8.4
 set linuxSources [ file normalize "linux-sources" ]
 
 # utilities
-set fuseZip "../fuse-zip"
+set vmasFS "../vmas-fs"
 set fusermount "fusermount"
 set kioCopy "kio_copy/kio_copy"
 set uzip "/usr/share/mc/extfs/uzip"
@@ -46,13 +46,13 @@ set unzip "unzip"
 set timeCmd "/usr/bin/time -f \"%e\t%U\t%S\" -o /dev/stdout"
 
 # paths
-set tmpDir [ file normalize "fusezip-tests-temp" ]
+set tmpDir [ file normalize "vmasfs-tests-temp" ]
 set mountPoint "$tmpDir/mountpoint-subdir/mount-point"
 set extractDir "$tmpDir/extract-dir"
 set archive "$tmpDir/archive.zip"
 
 set participants {
-    fuse-zip
+    vmas-fs
     kio-zip
     kio-krarc
     mc-uzip
@@ -259,24 +259,24 @@ proc fuseExec {mountCmd binary args} {
     return $res
 }
 
-proc fuseZipExec {args} {
-    global fuseZip archive mountPoint
-    return [ eval [ concat [ list fuseExec "$fuseZip $archive $mountPoint" "fuse-zip" ] $args ] ]
+proc vmasFSExec {args} {
+    global vmasFS archive mountPoint
+    return [ eval [ concat [ list fuseExec "$vmasFS $archive $mountPoint" "vmas-fs" ] $args ] ]
 }
 
-proc fuse-zip {action} {
+proc vmas-fs {action} {
     global mountPoint extractDir linuxSources
 
     switch -glob $action {
         add-* -
         zip-* {
-            return [ fuseZipExec cp -r -t $mountPoint $extractDir ]
+            return [ vmasFSExec cp -r -t $mountPoint $extractDir ]
         }
         unzip-* {
-            return [ fuseZipExec cp -r $mountPoint/* $extractDir ]
+            return [ vmasFSExec cp -r $mountPoint/* $extractDir ]
         }
         extract-one-* {
-            return [ fuseZipExec cp -r $mountPoint/data/file $extractDir ]
+            return [ vmasFSExec cp -r $mountPoint/data/file $extractDir ]
         }
         default {
             error "Action $action not implemented"

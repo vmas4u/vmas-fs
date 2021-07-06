@@ -1,4 +1,4 @@
-DEST=libfusezip.a
+DEST=libvmasfs.a
 LIBS=$(shell pkg-config fuse --libs) $(shell pkg-config libzip --libs)
 CXXFLAGS=-g -O0 -Wall -Wextra
 RELEASE_CXXFLAGS=-O2 -Wall -Wextra
@@ -16,8 +16,8 @@ release:
 $(DEST): $(OBJECTS)
 	$(AR) -cr $@ $(OBJECTS)
 
-# fuse-zip.cpp must be compiled separately with FUSEFLAGS
-fuse-zip.o: fuse-zip.cpp
+# vmas-fs.cpp must be compiled separately with FUSEFLAGS
+vmas-fs.o: vmas-fs.cpp
 	$(CXX) -c $(CXXFLAGS) $(FUSEFLAGS) $(ZIPFLAGS) $< -o $@
 
 .cpp.o:

@@ -1,22 +1,7 @@
 ////////////////////////////////////////////////////////////////////////////
-//  Copyright (C) 2008-2014 by Alexander Galanin                          //
-//  al@galanin.nnov.ru                                                    //
-//  http://galanin.nnov.ru/~al                                            //
+//  Copyright (C) 2021 by V+ Publicidad SpA                               //
+//  http://www.vmaspublicidad.com                                         //
 //                                                                        //
-//  This program is free software; you can redistribute it and/or modify  //
-//  it under the terms of the GNU Lesser General Public License as        //
-//  published by the Free Software Foundation; either version 3 of the    //
-//  License, or (at your option) any later version.                       //
-//                                                                        //
-//  This program is distributed in the hope that it will be useful,       //
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of        //
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the         //
-//  GNU General Public License for more details.                          //
-//                                                                        //
-//  You should have received a copy of the GNU Lesser General Public      //
-//  License along with this program; if not, write to the                 //
-//  Free Software Foundation, Inc.,                                       //
-//  51 Franklin St, Fifth Floor, Boston, MA 02110-1301, USA               //
 ////////////////////////////////////////////////////////////////////////////
 
 #define STANDARD_BLOCK_SIZE (512)
@@ -37,17 +22,17 @@
 #include <cstdlib>
 #include <queue>
 
-#include "fuse-zip.h"
+#include "vmas-fs.h"
 #include "types.h"
 #include "fileNode.h"
-#include "fuseZipData.h"
+#include "vmasFSData.h"
 
 using namespace std;
 
 //TODO: Move printf-s out this function
-FuseZipData *initFuseZip(const char *program, const char *fileName,
+VmasFSData *initVmasFS(const char *program, const char *fileName,
         bool readonly) {
-    FuseZipData *data = NULL;
+    VmasFSData *data = NULL;
     int err;
     struct zip *zip_file;
 
@@ -69,7 +54,7 @@ FuseZipData *initFuseZip(const char *program, const char *fileName,
             return data;
         }
 
-        data = new FuseZipData(fileName, zip_file, cwd);
+        data = new VmasFSData(fileName, zip_file, cwd);
         free(cwd);
         if (data == NULL) {
             throw std::bad_alloc();
@@ -95,23 +80,23 @@ FuseZipData *initFuseZip(const char *program, const char *fileName,
     return data;
 }
 
-void *fusezip_init(struct fuse_conn_info *conn) {
+void *vmasfs_init(struct fuse_conn_info *conn) {
     (void) conn;
-    FuseZipData *data = (FuseZipData*)fuse_get_context()->private_data;
+    VmasFSData *data = (VmasFSData*)fuse_get_context()->private_data;
     syslog(LOG_INFO, "Mounting file system on %s (cwd=%s)", data->m_archiveName, data->m_cwd.c_str());
     return data;
 }
 
-inline FuseZipData *get_data() {
-    return (FuseZipData*)fuse_get_context()->private_data;
+inline VmasFSData *get_data() {
+    return (VmasFSData*)fuse_get_context()->private_data;
 }
 
 inline struct zip *get_zip() {
     return get_data()->m_zip;
 }
 
-void fusezip_destroy(void *data) {
-    FuseZipData *d = (FuseZipData*)data;
+void vmasfs_destroy(void *data) {
+    VmasFSData *d = (VmasFSData*)data;
     d->save ();
     delete d;
     syslog(LOG_INFO, "File system unmounted");
@@ -121,7 +106,7 @@ FileNode *get_file_node(const char *fname) {
     return get_data()->find (fname);
 }
 
-int fusezip_getattr(const char *path, struct stat *stbuf) {
+int vmasfs_getattr(const char *path, struct stat *stbuf) {
     memset(stbuf, 0, sizeof(struct stat));
     if (*path == '\0') {
         return -ENOENT;
@@ -149,7 +134,7 @@ int fusezip_getattr(const char *path, struct stat *stbuf) {
     return 0;
 }
 
-int fusezip_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
+int vmasfs_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t offset, struct fuse_file_info *fi) {
     (void) offset;
     (void) fi;
 
@@ -169,7 +154,7 @@ int fusezip_readdir(const char *path, void *buf, fuse_fill_dir_t filler, off_t o
     return 0;
 }
 
-int fusezip_statfs(const char *path, struct statvfs *buf) {
+int vmasfs_statfs(const char *path, struct statvfs *buf) {
     (void) path;
 
     // Getting amount of free space in directory with archive
@@ -193,7 +178,7 @@ int fusezip_statfs(const char *path, struct statvfs *buf) {
     return 0;
 }
 
-int fusezip_open(const char *path, struct fuse_file_info *fi) {
+int vmasfs_open(const char *path, struct fuse_file_info *fi) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -217,7 +202,7 @@ int fusezip_open(const char *path, struct fuse_file_info *fi) {
     }
 }
 
-int fusezip_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
+int vmasfs_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
     if (*path == '\0') {
         return -EACCES;
     }
@@ -236,31 +221,31 @@ int fusezip_create(const char *path, mode_t mode, struct fuse_file_info *fi) {
     return node->open();
 }
 
-int fusezip_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+int vmasfs_read(const char *path, char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
     (void) path;
 
     return ((FileNode*)fi->fh)->read(buf, size, offset);
 }
 
-int fusezip_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
+int vmasfs_write(const char *path, const char *buf, size_t size, off_t offset, struct fuse_file_info *fi) {
     (void) path;
 
     return ((FileNode*)fi->fh)->write(buf, size, offset);
 }
 
-int fusezip_release (const char *path, struct fuse_file_info *fi) {
+int vmasfs_release (const char *path, struct fuse_file_info *fi) {
     (void) path;
 
     return ((FileNode*)fi->fh)->close();
 }
 
-int fusezip_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi) {
+int vmasfs_ftruncate(const char *path, off_t offset, struct fuse_file_info *fi) {
     (void) path;
 
     return -((FileNode*)fi->fh)->truncate(offset);
 }
 
-int fusezip_truncate(const char *path, off_t offset) {
+int vmasfs_truncate(const char *path, off_t offset) {
     if (*path == '\0') {
         return -EACCES;
     }
@@ -282,7 +267,7 @@ int fusezip_truncate(const char *path, off_t offset) {
     return node->close();
 }
 
-int fusezip_unlink(const char *path) {
+int vmasfs_unlink(const char *path) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -296,7 +281,7 @@ int fusezip_unlink(const char *path) {
     return -get_data()->removeNode(node);
 }
 
-int fusezip_rmdir(const char *path) {
+int vmasfs_rmdir(const char *path) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -313,7 +298,7 @@ int fusezip_rmdir(const char *path) {
     return -get_data()->removeNode(node);
 }
 
-int fusezip_mkdir(const char *path, mode_t mode) {
+int vmasfs_mkdir(const char *path, mode_t mode) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -330,7 +315,7 @@ int fusezip_mkdir(const char *path, mode_t mode) {
     return 0;
 }
 
-int fusezip_rename(const char *path, const char *new_path) {
+int vmasfs_rename(const char *path, const char *new_path) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -406,7 +391,7 @@ int fusezip_rename(const char *path, const char *new_path) {
     }
 }
 
-int fusezip_utimens(const char *path, const struct timespec tv[2]) {
+int vmasfs_utimens(const char *path, const struct timespec tv[2]) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -419,30 +404,30 @@ int fusezip_utimens(const char *path, const struct timespec tv[2]) {
 }
 
 #if ( __APPLE__ )
-int fusezip_setxattr(const char *, const char *, const char *, size_t, int, uint32_t) {
+int vmasfs_setxattr(const char *, const char *, const char *, size_t, int, uint32_t) {
 #else
-int fusezip_setxattr(const char *, const char *, const char *, size_t, int) {
+int vmasfs_setxattr(const char *, const char *, const char *, size_t, int) {
 #endif
     return -ENOTSUP;
 }
 
 #if ( __APPLE__ )
-int fusezip_getxattr(const char *, const char *, char *, size_t, uint32_t) {
+int vmasfs_getxattr(const char *, const char *, char *, size_t, uint32_t) {
 #else
-int fusezip_getxattr(const char *, const char *, char *, size_t) {
+int vmasfs_getxattr(const char *, const char *, char *, size_t) {
 #endif
     return -ENOTSUP;
 }
 
-int fusezip_listxattr(const char *, char *, size_t) {
+int vmasfs_listxattr(const char *, char *, size_t) {
     return -ENOTSUP;
 }
 
-int fusezip_removexattr(const char *, const char *) {
+int vmasfs_removexattr(const char *, const char *) {
     return -ENOTSUP;
 }
 
-int fusezip_chmod(const char *path, mode_t mode) {
+int vmasfs_chmod(const char *path, mode_t mode) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -454,7 +439,7 @@ int fusezip_chmod(const char *path, mode_t mode) {
     return 0;
 }
 
-int fusezip_chown(const char *path, uid_t uid, gid_t gid) {
+int vmasfs_chown(const char *path, uid_t uid, gid_t gid) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -471,31 +456,31 @@ int fusezip_chown(const char *path, uid_t uid, gid_t gid) {
     return 0;
 }
 
-int fusezip_flush(const char *, struct fuse_file_info *) {
+int vmasfs_flush(const char *, struct fuse_file_info *) {
     return 0;
 }
 
-int fusezip_fsync(const char *, int, struct fuse_file_info *) {
+int vmasfs_fsync(const char *, int, struct fuse_file_info *) {
     return 0;
 }
 
-int fusezip_fsyncdir(const char *, int, struct fuse_file_info *) {
+int vmasfs_fsyncdir(const char *, int, struct fuse_file_info *) {
     return 0;
 }
 
-int fusezip_opendir(const char *, struct fuse_file_info *) {
+int vmasfs_opendir(const char *, struct fuse_file_info *) {
   return 0;
 }
 
-int fusezip_releasedir(const char *, struct fuse_file_info *) {
+int vmasfs_releasedir(const char *, struct fuse_file_info *) {
     return 0;
 }
 
-int fusezip_access(const char *, int) {
+int vmasfs_access(const char *, int) {
     return 0;
 }
 
-int fusezip_readlink(const char *path, char *buf, size_t size) {
+int vmasfs_readlink(const char *path, char *buf, size_t size) {
     if (*path == '\0') {
         return -ENOENT;
     }
@@ -519,7 +504,7 @@ int fusezip_readlink(const char *path, char *buf, size_t size) {
     return 0;
 }
 
-int fusezip_symlink(const char *dest, const char *path) {
+int vmasfs_symlink(const char *dest, const char *path) {
     if (*path == '\0') {
         return -EACCES;
     }
