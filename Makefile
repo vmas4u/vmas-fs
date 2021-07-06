@@ -1,4 +1,4 @@
-DEST=fuse-zip
+DEST=vmas-fs
 LIBS=-Llib -Wl,-Bstatic -lfusezip $(shell pkg-config libzip --libs) -Wl,-Bdynamic $(shell pkg-config fuse --libs)
 LIB=lib/libfusezip.a
 CXXFLAGS=-g -O0 -Wall -Wextra
@@ -8,8 +8,8 @@ FUSEFLAGS=$(shell pkg-config fuse --cflags)
 ZIPFLAGS=$(shell pkg-config libzip --cflags)
 SOURCES=main.cpp
 OBJECTS=$(SOURCES:.cpp=.o)
-MANSRC=fuse-zip.1
-MAN=fuse-zip.1.gz
+MANSRC=vmas-fs.1
+MAN=vmas-fs.1.gz
 CLEANFILES=$(OBJECTS) $(MAN)
 DOCFILES=README changelog
 INSTALLPREFIX=/usr
@@ -67,7 +67,7 @@ tarball:
 	./makeArchives.sh
 
 tarball-clean:
-	rm -f fuse-zip-*.tar.gz fuse-zip-tests-*.tar.gz
+	rm -f vmas-fs-*.tar.gz vmas-fs-tests-*.tar.gz
 
 release:
 	make CXXFLAGS="$(RELEASE_CXXFLAGS)" LDFLAGS="$(RELEASE_LDFLAGS)" all doc
