@@ -19,7 +19,7 @@
 #include <cerrno>
 
 #include "vmas-fs.h"
-#include "fuseZipData.h"
+#include "vmasFSData.h"
 
 /**
  * Print usage information
@@ -177,7 +177,7 @@ int main(int argc, char *argv[]) {
         }
 
         openlog(PROGRAM, LOG_PID, LOG_USER);
-        if ((data = initFuseZip(PROGRAM, param.fileName, param.readonly))
+        if ((data = initVmasFS(PROGRAM, param.fileName, param.readonly))
                 == NULL) {
             fuse_opt_free_args(&args);
             return EXIT_FAILURE;
