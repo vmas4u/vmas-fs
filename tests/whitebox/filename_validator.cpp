@@ -10,7 +10,7 @@
 // Public Morozoff design pattern :)
 #define private public
 
-#include "fuseZipData.h"
+#include "vmasFSData.h"
 #include "common.h"
 
 // FUSE stub functions
@@ -119,7 +119,7 @@ const char *zip_file_strerror(struct zip_file *) {
 void checkValidationException(const char *fname, const char *prefix) {
     bool thrown = false;
     try {
-        FuseZipData::validateFileName(fname);
+        VmasFSData::validateFileName(fname);
     }
     catch (const std::runtime_error &e) {
         thrown = true;
@@ -132,7 +132,7 @@ void checkConvertException(const char *fname, const char *prefix, bool readonly,
     bool thrown = false;
     try {
         std::string converted;
-        FuseZipData::convertFileName(fname, readonly, needPrefix, converted);
+        VmasFSData::convertFileName(fname, readonly, needPrefix, converted);
     }
     catch (const std::runtime_error &e) {
         thrown = true;
@@ -143,7 +143,7 @@ void checkConvertException(const char *fname, const char *prefix, bool readonly,
 
 void checkConversion(const char *fname, bool readonly, bool needPrefix, const char *expected) {
     std::string res;
-    FuseZipData::convertFileName(fname, readonly, needPrefix, res);
+    VmasFSData::convertFileName(fname, readonly, needPrefix, res);
     assert(res == expected);
 }
 
@@ -151,16 +151,16 @@ int main(int, char **) {
     initTest();
 
     // validator
-    FuseZipData::validateFileName("normal.name");
-    FuseZipData::validateFileName("path/to/normal.name");
+    VmasFSData::validateFileName("normal.name");
+    VmasFSData::validateFileName("path/to/normal.name");
 
-    FuseZipData::validateFileName(".hidden");
-    FuseZipData::validateFileName("path/to/.hidden");
-    FuseZipData::validateFileName("path/to/.hidden/dir");
+    VmasFSData::validateFileName(".hidden");
+    VmasFSData::validateFileName("path/to/.hidden");
+    VmasFSData::validateFileName("path/to/.hidden/dir");
 
-    FuseZipData::validateFileName("..superhidden");
-    FuseZipData::validateFileName("path/to/..superhidden");
-    FuseZipData::validateFileName("path/to/..superhidden/dir");
+    VmasFSData::validateFileName("..superhidden");
+    VmasFSData::validateFileName("path/to/..superhidden");
+    VmasFSData::validateFileName("path/to/..superhidden/dir");
 
     checkValidationException("", "empty file name");
     checkValidationException("moo//moo", "bad file name (two slashes): ");

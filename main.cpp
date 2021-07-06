@@ -147,7 +147,7 @@ int main(int argc, char *argv[]) {
         return EXIT_FAILURE;
     }
     struct fuse_args args = FUSE_ARGS_INIT(argc, argv);
-    FuseZipData *data = NULL;
+    VmasFSData *data = NULL;
     struct vmasfs_param param;
     param.help = false;
     param.version = false;

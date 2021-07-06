@@ -5,8 +5,8 @@
    fun:deflate
    obj:/usr/lib/libzip.so.1.0.0
    fun:zip_close
-   fun:_ZN11FuseZipDataD1Ev
-   fun:fusezip_destroy
+   fun:_ZN11VmasDSDataD1Ev
+   fun:vmasfs_destroy
    fun:fuse_fs_destroy
    obj:/usr/lib/libfuse.so.2.8.1
    obj:/usr/lib/libfuse.so.2.8.1

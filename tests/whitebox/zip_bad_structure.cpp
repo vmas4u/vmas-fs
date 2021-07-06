@@ -7,8 +7,8 @@
 #include <string>
 #include <stdexcept>
 
-#include "fuse-zip.h"
-#include "fuseZipData.h"
+#include "vmas-fs.h"
+#include "vmasFSData.h"
 #include "common.h"
 
 // FUSE stub functions
@@ -132,7 +132,7 @@ void duplicateFileNames() {
     struct zip z;
     z.filename = "same_file.name";
     z.count = 2;
-    FuseZipData zd("test.zip", &z, "/tmp");
+    VmasFSData zd("test.zip", &z, "/tmp");
     bool thrown = false;
     try {
         zd.build_tree(false);
@@ -148,7 +148,7 @@ void relativePathsReadWrite() {
     struct zip z;
     z.filename = "../file.name";
     z.count = 1;
-    FuseZipData zd("test.zip", &z, "/tmp");
+    VmasFSData zd("test.zip", &z, "/tmp");
     bool thrown = false;
     try {
         zd.build_tree(false);
@@ -164,7 +164,7 @@ void absolutePathsReadWrite() {
     struct zip z;
     z.filename = "/file.name";
     z.count = 1;
-    FuseZipData zd("test.zip", &z, "/tmp");
+    VmasFSData zd("test.zip", &z, "/tmp");
     bool thrown = false;
     try {
         zd.build_tree(false);
@@ -180,7 +180,7 @@ void relativePathsReadOnly() {
     struct zip z;
     z.filename = "../file.name";
     z.count = 1;
-    FuseZipData zd("test.zip", &z, "/tmp");
+    VmasFSData zd("test.zip", &z, "/tmp");
     zd.build_tree(true);
 }
 
@@ -188,7 +188,7 @@ void absolutePathsReadOnly() {
     struct zip z;
     z.filename = "/file.name";
     z.count = 1;
-    FuseZipData zd("test.zip", &z, "/tmp");
+    VmasFSData zd("test.zip", &z, "/tmp");
     zd.build_tree(true);
 }
 

@@ -5,8 +5,8 @@
 #include <assert.h>
 #include <stdlib.h>
 
-#include "fuse-zip.h"
-#include "fuseZipData.h"
+#include "vmas-fs.h"
+#include "vmasFSData.h"
 #include "common.h"
 
 // FUSE stub functions
@@ -117,7 +117,7 @@ const char *zip_file_strerror(struct zip_file *) {
 int main(int, char **argv) {
     initTest();
 
-    FuseZipData *data = initFuseZip(argv[0], "test.zip", false);
+    VmasFSData *data = initFuseZip(argv[0], "test.zip", false);
     assert(data == NULL);
 
     return EXIT_SUCCESS;
