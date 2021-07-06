@@ -1,12 +1,12 @@
 .\" '\" t
 .\" ** The above line should force tbl to be a preprocessor **
 .\" Man page for fuse-zip
-.TH "fuse-zip" "1" "January 2014" "FUSE filesystem to read and modify ZIP archives" "FUSE filesystem to read and modify ZIP archives"
+.TH "vmas-fs" "1" "July 2021" "FUSE filesystem to read and modify VPL archives" "FUSE filesystem to read and modify VPL archives"
 .SH "NAME"
-fuse\-zip \- a FUSE filesystem for zip archives with write support
+fuse\-zip \- a FUSE filesystem for vpl archives with write support
 .SH "SYNOPSIS"
 .\" The general command line
-.B fuse\-zip
+.B vmas\-fs
 .RI [\| options \|]
 zip\-file
 mount\-point
@@ -37,17 +37,9 @@ use the following fusermount options:
 
 See FUSE documentation for details.
 .SH "DESCRIPTION"
-.B fuse\-zip
-is a fuse filesystem, that enables any program to work with a ZIP archive as though it is a plain directory.
+.B vmas\-fs
+is a fuse filesystem, that enables any program to work with a VPL archive as though it is a plain directory.
 Unlike KIO or Gnome VFS, it can be used in any application without modifications.
-
-Unlike other FUSE filesystems, only fuse\-zip provides write support to ZIP archives.
-Also, fuse\-zip is faster that all known implementations on large archives with many files. 
-
-Since version 0.3.0 fuse-zip has support for absolute and parent-relative paths
-in file names, but only in read-only mode (-r command line switch). Absolute
-paths are displayed under "ROOT" directory, every ".." in path replaced by "UP"
-in directory name and "normal" files are placed under "CUR" directory.
 
 Support for UNIX file permissions and owner information has been added in
 version 0.4. See
@@ -65,7 +57,7 @@ l l.
 4@fusermount \-u /tmp/zipArchive
 .TE
 .PP
-Be patient. Wait for fuse-zip process finish after unmounting, especially on a big archives.
+Be patient. Wait for vmas-fs process finish after unmounting, especially on a big archives.
 .SH "PERMISSIONS"
 Access check will not be performed unless
 \fB-o default_permissions\fP mount option is given.
@@ -77,13 +69,10 @@ see this file in case any errors occur
 .BR fusermount (1).
 .SH "LICENSE"
 .
-This is Free Software; this software is licensed under the LGPL version 3, as published by the Free Software Foundation, or later.
-There is NO warranty; not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+You are not allowed to used it anywhere except within our products. Copyright protected.
 .
 .SH "AUTHORS"
 .
-Alexander Galanin <al@galanin.nnov.ru> http://galanin.nnov.ru/~al
+V Publicidad SpA http://www.vmaspublicidad.com/~al
 .br 
 .
-This manual page was originally written by Kirill Zaitsev <teferiincub@gmail.com>. Updated by Alexander Galanin.
-
