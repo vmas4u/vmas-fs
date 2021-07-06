@@ -1,7 +1,7 @@
 = ACERCA DE =
 
-vmas-fs es un sistema de archivos tipo FUSE, que permite montar archivos encriptados VPL como discos virtual implementado en C++.
-Con vmas-fs puedes trabajar con archivos VPL como si fueran directorios reales.
+vmas-fs es un sistema de archivos tipo FUSE, que permite montar archivos encriptados VFS como discos virtual implementado en C++.
+Con vmas-fs puedes trabajar con archivos VFS como si fueran directorios reales.
 
 vmas-fs are licensed under GNU LGPL v3.
 
@@ -9,12 +9,12 @@ vmas-fs are licensed under GNU LGPL v3.
 
 {{{
 $ mkdir /tmp/virtual
-$ vmas-fs app.vpl /tmp/virtual
+$ vmas-fs -p secreto app.vfl /tmp/virtual
 (usar /tmp/virtual/ como si fuera un disco real)
 $ fusermount -u /tmp/virtual
 }}}
 
-Si el archivo VPL no existe, sera creado al momento de desmontar el sistema de archivos.
+Si el archivo VFS no existe, sera creado al momento de desmontar el sistema de archivos.
 Se paciente. Espera que el proceso de vmas-fs termine cuando se desmonta para aplicar los cambios (si hubo escrituras).
 
 Mira el archivo /var/log/user.log en caso de errores.
